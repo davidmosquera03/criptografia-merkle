@@ -33,7 +33,6 @@ def get_merkle_tree(file_path):
             if not chunk:
                 break
             data.append(chunk)
-    #print(len(data))
     length = len(data)
     last_block_len = len(data[-1])
 
@@ -54,31 +53,84 @@ def get_merkle_tree(file_path):
     else:
         print("Block no. ok.")
 
+    # first n elements are leaves
     # for i to n make hash h(xi)
     merkle_tree = []
     n = len(data)
     for i in range(0,n):
         merkle_tree.append(hash_data(data[i]))
     
-    # for i to n-1 make hash(y_2i-1 ,y2i)
+    # for i to n-1 make hash(y_2i-1 ,y2i)=y_i+n
     for i in range(0,n-1):
         left = merkle_tree[2*i]
         right = merkle_tree[2*i+1]
         parent = hash_data(left + right)
         merkle_tree.append(parent)
-    print(f"Nodes 2*n-1: {len(merkle_tree)==(2*n-1)}")
+    print(f"Nodes=2*n-1: {len(merkle_tree)==(2*n-1)}")
     print(merkle_tree[-1])
     return  merkle_tree
 
-merkle = get_merkle_tree("./files/foto.png")
+""" merkle = get_merkle_tree("./files/foto.png")
 merkle1 = get_merkle_tree("./files/test_file.srt")
+ """
 
 # get merkle proof
 """
-input: array with index of blocks
-output: merkle proof, the intermediate blocks required to 
-compute merkle tree root
+input: array with indexes, merkle tree
+output: merkle proof
 """
 
-def get_merkle_proof(blocks):
+def get_merkle_proof(index,tree):
+    proof = []
+    indexes = index.copy()
+    # l = 2*n-1 
+    # n = (l+1)/2
+    n = (len(tree)+1)//2
+
+    # move through pairs, ignore root
+    for i in range(0,n-1,1):
+        left = tree[2*i]
+        right = tree[2*i+1]
+        parent = tree[i+n]
+        #if left and right not in index
+        # pass
+        if (left not in indexes) and (right not in indexes):
+            pass
+
+        # if both in index
+        # add parent to indexes
+        if (left in indexes) and (right in indexes):
+            indexes.append(parent)
+
+        # if (r/l) in index
+        # add (l/r) to proof
+        # add parent to index
+        if (right in indexes) and (left not in indexes):
+            proof.append(left)
+            indexes.append(parent)
+        if (left in indexes) and (right not in indexes):
+            proof.append(right)
+            indexes.append(parent)
+    return proof
+
+
+print(get_merkle_proof([1,8],[i for i in range(0,31)]))
+# recompute merkle root
+"""
+input: merkle proof
+output: merkle root
+"""
+
+def recompute_merkle_root(merkle_proof,indexes,n):
+    merged = sorted(merkle_proof+indexes)
+    print(merged)
+
+    while len(merged)>1:
+        l,r = merged.pop(0),merged.pop(0)
+        print(l,r,n+(l//2))
+        merged.append(n+(l//2))
+        merged.sort()
     return
+
+#recompute_merkle_root([0,9,11],[1,4,5],8)
+#recompute_merkle_root([],[1,8],16)
