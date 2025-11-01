@@ -1,4 +1,4 @@
-# imports
+# FIRST VERSION, SAVED FOR REFERENCE
 import hashlib
 
 def hash_data(data):
@@ -13,17 +13,16 @@ def is_power_of_2(n):
      """
      return n > 0 and (n & (n - 1)) == 0
 
-# get merkle tree
-"""
-input: file_path
-output: merkle tree root, merkle tree array
-
-Ex:
-i: algo.txt
-output: ()
-"""
 
 def get_merkle_tree(file_path):
+    """
+    input: file_path
+    output: merkle tree root, merkle tree array
+
+    Ex:
+    i: algo.txt
+    output: []
+    """
     data = []
     # open file
     with open(file_path, 'rb') as f:
@@ -74,13 +73,13 @@ def get_merkle_tree(file_path):
 merkle1 = get_merkle_tree("./files/test_file.srt")
  """
 
-# get merkle proof
-"""
-input: array with indexes, merkle tree
-output: merkle proof
-"""
+
 
 def get_merkle_proof(index,tree):
+    """
+    input: array with indexes, merkle tree
+    output: merkle proof
+    """
     proof = []
     indexes = index.copy()
     # l = 2*n-1 
@@ -127,10 +126,6 @@ def recompute_merkle_root(merkle_proof,indexes,n):
 
     while len(merged)>1:
         l,r = merged.pop(0),merged.pop(0)
-        print(l,r,n+(l//2))
         merged.append(n+(l//2))
         merged.sort()
-    return
-
-#recompute_merkle_root([0,9,11],[1,4,5],8)
-#recompute_merkle_root([],[1,8],16)
+    return merged
