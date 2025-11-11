@@ -69,10 +69,10 @@ def get_merkle_tree(file_path):
     print(merkle_tree[-1])
     return  merkle_tree
 
-""" merkle = get_merkle_tree("./files/foto.png")
+""" 
 merkle1 = get_merkle_tree("./files/test_file.srt")
  """
-
+merkle = get_merkle_tree("./files/foto.png")
 
 
 def get_merkle_proof(index,tree):

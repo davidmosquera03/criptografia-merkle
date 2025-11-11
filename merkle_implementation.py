@@ -1,9 +1,11 @@
 # imports
 import hashlib
 import json, os
+import random
 
 def hash_data(data):
     return hashlib.sha256(data).digest()
+
 
 def is_power_of_2(n):
      """
@@ -18,9 +20,7 @@ def is_power_of_2(n):
      """
      return n > 0 and (n & (n - 1)) == 0
 
-
-import random
-
+# USADA POR SERVIDOR
 def corrupt_file(file_path, percentage):
     """
     Corrupts a percentage of a file by flipping random bits
@@ -55,6 +55,7 @@ def corrupt_file(file_path, percentage):
     print(f"Corrupted file saved to {out_path}")
     return out_path
 
+
 def corrupt_merkle_tree(file_path, percentage):
     """
     Makes a new merkle_tree based on corrupted file
@@ -81,9 +82,9 @@ def corrupt_merkle_tree(file_path, percentage):
 
     # Pad last block if needed
     if last_block_len < SIZE:
-        print(f"{last_block_len}b in last block not right size")
+        #print(f"{last_block_len}b in last block not right size")
         data[-1] += bytearray(SIZE - last_block_len)
-        print(f"size now {len(data[-1])}b")
+        #print(f"size now {len(data[-1])}b")
     else:
         print("Final block ok.")
 
@@ -141,6 +142,7 @@ def corrupt_merkle_tree(file_path, percentage):
     
     return merkle_tree
 
+# USADA POR CLI y SERVIDOR
 def get_merkle_tree(file_path):
     """
     input: file_path
@@ -204,6 +206,7 @@ def get_merkle_tree(file_path):
     print(f"Merkle tree saved to {out_path}")
     return merkle_tree
 
+# USADA POR SERVIDOR
 def get_merkle_proof(indexes, tree_json):
     """
     inputs:
@@ -220,6 +223,8 @@ def get_merkle_proof(indexes, tree_json):
     proof = []
 
     # get the blocks from index
+    # NOTA, para pruebas de corrupcion
+    # solo usar esta ruta si ya se corrompió el archivo y recomputó su arbol
     leaf_nodes = [{"index": i, "data": tree[i]} for i in indexes]
 
     # walk internal nodes to gather sibling hashes needed
@@ -239,7 +244,19 @@ def get_merkle_proof(indexes, tree_json):
             covered.add(p)
     return leaf_nodes, proof
 
+# USADA POR CLI
 def recompute_merkle_root(leaf_nodes, merkle_proof, n):
+    """
+    recomputes the merkle tree root
+    based on the merkle proof and leaf nodes
+
+    IMPORTANTE: esta ruta asume que los leaf_nodes ya han
+    sido hasheados al ser entregados
+
+    si se pasan los bloques originales, hashearlos antes de 
+    pasarlos en el argumento
+    
+    """
     # merge both lists (proof + leaves) and sort
     merged = sorted(leaf_nodes + merkle_proof, key=lambda x: x["index"])
     print("merged start:", [m["index"] for m in merged])
@@ -257,10 +274,10 @@ def recompute_merkle_root(leaf_nodes, merkle_proof, n):
 
     return merged[0]
 
-# EXAMPLE
+# EXAMPLES
 
-# create tree
 def test_normal():
+    # Generate Merkle Tree
     file_path = "./files/test_file.srt"
     get_merkle_tree(file_path)
 
