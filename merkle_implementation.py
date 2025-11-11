@@ -21,6 +21,40 @@ def is_power_of_2(n):
 
 import random
 
+def corrupt_file(file_path, percentage):
+    """
+    Corrupts a percentage of a file by flipping random bits
+    
+    input: 
+        file_path: path to file
+        percentage: 0 to 1, % of file to corrupt
+    
+    output: path to corrupted file
+    """
+    # Read entire file
+    with open(file_path, 'rb') as f:
+        data = bytearray(f.read())
+    
+    file_size = len(data)
+    num_bits_to_corrupt = int(file_size * 8 * percentage)
+    print(f"Corrupting {num_bits_to_corrupt} bits out of {file_size * 8} total bits")
+    
+    # Corrupt random bits
+    corrupted_positions = random.sample(range(file_size * 8), num_bits_to_corrupt)
+    
+    for bit_pos in corrupted_positions:
+        byte_idx = bit_pos // 8
+        bit_idx = bit_pos % 8
+        data[byte_idx] ^= (1 << bit_idx)
+    
+    # Save corrupted file
+    out_path = os.path.splitext(file_path)[0] + "_corrupted" + os.path.splitext(file_path)[1]
+    with open(out_path, 'wb') as f:
+        f.write(data)
+    
+    print(f"Corrupted file saved to {out_path}")
+    return out_path
+
 def corrupt_merkle_tree(file_path, percentage):
     """
     Makes a new merkle_tree based on corrupted file
@@ -255,7 +289,7 @@ def test_normal():
     print("File integrity safe: ",root==tree[-1])
 
 def test_corrupted(percentage):
-    # make corrupt tree
+    # make corrupt tree 
     file_path = "./files/test_file.srt"
     corrupt_merkle_tree(file_path,percentage)
 
@@ -286,5 +320,34 @@ def test_corrupted(percentage):
     print("actual   :", og_tree[-1])
     print("File integrity safe: ",root==og_tree[-1])
 
+def test_corrupted2(percentage): # THE IMPORTANT ONE
+    # Corrupt the file
+    corrupt_file("./files/test_file.srt", percentage)
+    
+    # Get original tree (from manifest)
+    og_tree_path = "./files/test_file_merkle.json"
+    with open(og_tree_path) as f:
+        og_tree = json.load(f)
+    
+    # Get corrupted file's tree
+    corrupted_tree = get_merkle_tree("./files/test_file_corrupted.srt")
+    
+    # Choose blocks to challenge
+    indexes = [2]
+    
+    # Get proof from corrupted file
+    leaf_nodes, proof = get_merkle_proof(indexes, corrupted_tree)
+    
+    n = (len(corrupted_tree) + 1) // 2
+    
+    # Recompute root and compare to original
+    recomputed_root = recompute_merkle_root(leaf_nodes, proof, n)
+    
+    print("Recomputed root:", recomputed_root)
+    print("Original root  :", og_tree[-1])
+    print("File integrity safe:", recomputed_root == og_tree[-1])
+
+
 #test_normal()
 #test_corrupted(0.2)
+#test_corrupted2(0.0001)
