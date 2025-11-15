@@ -44,12 +44,12 @@ def get_merkle_tree(file_path):
 
 # Create a test file with 4 blocks
 test_data = [b'block0', b'block1', b'block2', b'block3']
-with open('test.txt', 'wb') as f:
+with open('./test/test.txt', 'wb') as f:
     for block in test_data:
         f.write(block.ljust(4096, b'\x00'))
 
 # Test your function
-tree = get_merkle_tree('test.txt')
+tree = get_merkle_tree('./test/test.txt')
 
 # Let's manually verify the tree structure
 print("\nManual verification:")
