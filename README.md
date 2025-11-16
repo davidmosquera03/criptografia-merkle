@@ -67,6 +67,17 @@ nonce
 - recibe arbol de merkle T y archivo f
 - almacena T y f asignando id especifico al archivo (para evitar repetidos)
 
+body:
+
+```
+{
+  "id": "string",
+  "merkleTreeModel": [
+    "MerkleTreeHere"
+  ]
+}
+```
+
 ### /challenge:
 
 - recibe challenge y lo almacena
