@@ -1,3 +1,5 @@
+import json
+
 def individual_merkle_tree_schema(id, merkle_tree) -> dict:
     return {
         "id": str(id),
@@ -9,5 +11,16 @@ def individual_merkle_tree_schema(id, merkle_tree) -> dict:
     
 
 def list_merkle_trees_schema(merkle_trees) -> list:
-    return [individual_merkle_tree_schema(merkle_tree) for merkle_tree in merkle_trees]
+    results = []
+    for tree in merkle_trees:
+        result = individual_merkle_tree_schema(tree.get("id", ""), tree)
+        result = {"id": result["id"]}
+        results.append(result)
+    return results
 
+def get_merkle_tree_index(index, merkle_trees) -> dict:
+    try:
+        tree = merkle_trees[index]
+        return individual_merkle_tree_schema(tree.get("index", ""), tree)
+    except IndexError:
+        return {}

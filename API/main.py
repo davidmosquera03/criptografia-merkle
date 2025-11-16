@@ -1,14 +1,25 @@
 from fastapi import FastAPI, APIRouter, HTTPException, File, Form, UploadFile
 from config import collection
-from database.schemas import individual_merkle_tree_schema
+from database.schemas import individual_merkle_tree_schema, list_merkle_trees_schema
 from database.models import merkleTreeModel
-from typing import List
 import json
 
 app = FastAPI()
 router = APIRouter()
 
 @router.get("/")
+async def get_all_merkle_trees():
+    try:
+
+        merkle_trees = collection.find()
+        results = list_merkle_trees_schema(merkle_trees)
+        return {"merkle_trees": results}
+    
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/get_merkle_tree/{id}")
 async def get_merkle_tree(id: str):
     try:
         # Use a filter dict when querying MongoDB
