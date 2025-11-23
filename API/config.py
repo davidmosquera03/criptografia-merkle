@@ -11,3 +11,5 @@ client = MongoClient(uri, server_api=ServerApi('1'))
 
 db = client.criptografia_merkle
 collection = db.merkle_trees
+challenge_collection = db.challenges
+log_collection = db.logs

@@ -1,4 +1,3 @@
-import json
 
 def individual_merkle_tree_schema(id, merkle_tree) -> dict:
     return {
@@ -24,3 +23,12 @@ def get_merkle_tree_index(index, merkle_trees) -> dict:
         return individual_merkle_tree_schema(tree.get("index", ""), tree)
     except IndexError:
         return {}
+    
+def get_logs_schema(logs) -> list:
+    results = []
+    for log in logs:
+        results.append({
+            "challenge_id": log["challenge_id"],
+            "result": log["result"]
+        })
+    return results

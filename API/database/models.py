@@ -8,3 +8,18 @@ class merkleTreeModel(BaseModel):
     class Config:
         orm_mode = True
 
+class challengeModel(BaseModel):
+    challenge_id: str
+    file_id: str
+    nonce: bytes
+    indexes: list[int]
+
+    class Config:
+        orm_mode = True
+
+class logModel(BaseModel):
+    challenge_id: str
+    result: str
+
+    class Config:
+        orm_mode = True

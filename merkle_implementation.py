@@ -196,7 +196,24 @@ def get_challenge_blocks(file_path, indexes, nonce, block_size=4096):
             block = f.read(block_size)
             #print("hash normal",hash_data(block).hex())
             h = hashlib.sha256(block + nonce).hexdigest()
+            print("block hash:", h)
             out.append({"index": i, "data": h})
+    return out
+
+# USADA POR SERVIDOR
+def get_challenge_blocks_mongo(content, indexes, nonce, block_size=4096):
+    """
+    retrieves raw blocks from binary content of original file 
+    and hashes with nonce for use in challenge
+    """
+    out = []
+    for i in indexes:
+        start = i * block_size
+        block = content[start:start + block_size]
+        #print("hash normal",hash_data(block).hex())
+        
+        h = hashlib.sha256(block + nonce).hexdigest()
+        out.append({"index": i, "data": h})
     return out
 
 def get_blocks(file_path,indexes,block_size=4096):
@@ -223,15 +240,13 @@ def test_execution():
     # 2 CHALLENGE
     # A. indexes and nonce
     indexes = [2]
-    nonce = os.urandom(32)
-
+    nonce = "os.urandom(32)"
     # B. blocks hashes with nonce, get proof
     challenge_blocks = get_challenge_blocks("./files/test_file.srt_blocks.bin",indexes,nonce)
     proof = get_merkle_proof(indexes,tree)
     # C. make new root R'
     n = (len(tree) + 1)//2
     root_prime = recompute_merkle_root(challenge_blocks,proof,n)
-    print(root_prime)
 
     # server will do 2A, 2B, 2C with its own file
     
