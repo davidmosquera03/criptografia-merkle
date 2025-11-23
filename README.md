@@ -2,7 +2,16 @@
 
 Proyecto final de Criptografía, consiste en un servicio práctico para comprobar que un servidor realmente almacena archivos sin descargarlos completos, mediante Pruebas de Almacenamiento tipo Merkle PoR.
 
+# Requerimientos
+
+- Python 3.12 y superior
+- MongoDB (Atlas o Local)
+
 # Ejecución
+
+## Base de datos
+
+cambiar .env.example por .env y agregar connection string de MongoDB
 
 ## Servidor
 
