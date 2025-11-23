@@ -13,7 +13,8 @@ def list_merkle_trees_schema(merkle_trees) -> list:
     results = []
     for tree in merkle_trees:
         result = individual_merkle_tree_schema(tree.get("id", ""), tree)
-        result = {"id": result["id"]}
+        result = {"id": result["id"],
+                  "filename": result["filename"]}
         results.append(result)
     return results
 

@@ -2,14 +2,14 @@
 from fastapi import FastAPI, APIRouter, HTTPException, File, Form, UploadFile
 from config import collection, challenge_collection, log_collection
 from database.schemas import get_logs_schema, individual_merkle_tree_schema, list_merkle_trees_schema
-from database.models import merkleTreeModel, challengeModel, logModel
+from database.models import merkleTreeModel, challengeModel, logModel, corruptChallengeModel
 import json
 import sys
 import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from merkle_implementation import get_merkle_proof, recompute_merkle_root, get_challenge_blocks_mongo
+from merkle_implementation import get_merkle_tree, corrupt_file, get_merkle_proof, recompute_merkle_root, get_challenge_blocks_mongo
 
 app = FastAPI()
 router = APIRouter()
@@ -27,7 +27,7 @@ async def get_all_merkle_trees():
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/get_merkle_tree/{id}")
-async def get_merkle_tree(id: str):
+async def get_merkle_tree_id(id: str):
     try:
         # Use a filter dict when querying MongoDB
         merkle_tree = collection.find_one({"id": id})
@@ -103,6 +103,40 @@ async def prove_challenge(challenge_id: str):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.post("/simulate")
+async def simulate_challenge(corrupt_challenge: corruptChallengeModel):
+    '''
+    realizar copia de archivo
+    corromper copia en porcentage dado
+    seguir instrucciones de challenge
+    actuar como en /challenge /verify
+    '''
+    
+    try:
+        merkle_tree = collection.find_one({"id": corrupt_challenge.file_id})
+        if not merkle_tree:
+            raise HTTPException(status_code=404, detail="Merkle tree not found")
+    
+        content = merkle_tree.get("content", b"")
+        corrupt_content_path = corrupt_file(content, corrupt_challenge.percentage)
+        print("Corrupted file created at:", corrupt_content_path)
+        with open(corrupt_content_path, 'rb') as f:
+            corrupt_content = f.read()
+        
+        corrupte_tree = get_merkle_tree(corrupt_content_path)
+        nonce = corrupt_challenge.nonce
+        indexes = corrupt_challenge.indexes
+        challenge_blocks = get_challenge_blocks_mongo(corrupt_content, indexes, nonce)
+        proof = get_merkle_proof(indexes, corrupte_tree)
+        recomputed_root = recompute_merkle_root(challenge_blocks, proof, (len(corrupte_tree)+1)//2)
+        
+        return {"status": "success", "recomputed_root": recomputed_root}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 
 @router.post("/logs")
 async def log_message(log: logModel):

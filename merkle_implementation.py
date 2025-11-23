@@ -21,7 +21,7 @@ def is_power_of_2(n):
      return n > 0 and (n & (n - 1)) == 0
 
 # USADA POR SERVIDOR
-def corrupt_file(file_path, percentage):
+def corrupt_file(content, percentage):
     """
     Corrupts a percentage of a file by flipping random bits
     
@@ -32,8 +32,8 @@ def corrupt_file(file_path, percentage):
     output: path to corrupted file
     """
     # Read entire file
-    with open(file_path, 'rb') as f:
-        data = bytearray(f.read())
+    
+    data = bytearray(content)
     
     file_size = len(data)
     num_bits_to_corrupt = int(file_size * 8 * percentage)
@@ -48,7 +48,7 @@ def corrupt_file(file_path, percentage):
         data[byte_idx] ^= (1 << bit_idx)
     
     # Save corrupted file
-    out_path = os.path.splitext(file_path)[0] + "_corrupted" + os.path.splitext(file_path)[1]
+    out_path = os.path.splitext("../files/test_file.srt")[0] + "_serverCorrupted" + os.path.splitext("../files/test_file.srt")[1]
     with open(out_path, 'wb') as f:
         f.write(data)
     

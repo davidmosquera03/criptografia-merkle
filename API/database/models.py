@@ -17,6 +17,16 @@ class challengeModel(BaseModel):
     class Config:
         orm_mode = True
 
+class corruptChallengeModel(BaseModel):
+    challenge_id: str
+    file_id: str
+    nonce: bytes
+    indexes: list[int]
+    percentage: float
+
+    class Config:
+        orm_mode = True
+
 class logModel(BaseModel):
     challenge_id: str
     result: str
