@@ -97,7 +97,8 @@ async def prove_challenge(challenge_id: str):
         recomputed_root = recompute_merkle_root(challenge_blocks, proof, (len(tree_json)+1)//2)
 
         return {
-            "recomputed_root": recomputed_root
+            "recomputed_root": recomputed_root,
+            "nonce": nonce,
         }
         
     except Exception as e:
