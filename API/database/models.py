@@ -20,12 +20,9 @@ class challengeModel(BaseModel):
 class corruptChallengeModel(BaseModel):
     challenge_id: str
     file_id: str
-    nonce: bytes
+    nonce: str  # Change to str
     indexes: list[int]
     percentage: float
-
-    class Config:
-        orm_mode = True
 
 class logModel(BaseModel):
     challenge_id: str

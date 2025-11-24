@@ -6,6 +6,7 @@ from database.models import merkleTreeModel, challengeModel, logModel, corruptCh
 import json
 import sys
 import os
+import base64
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -124,13 +125,13 @@ async def simulate_challenge(corrupt_challenge: corruptChallengeModel):
         with open(corrupt_content_path, 'rb') as f:
             corrupt_content = f.read()
         
-        corrupte_tree = get_merkle_tree(corrupt_content_path)
-        nonce = corrupt_challenge.nonce
+        tree_json = merkle_tree.get("merkleTreeModel", [])
+        nonce = base64.b64decode(corrupt_challenge.nonce)  # Decode base64 to bytes
         indexes = corrupt_challenge.indexes
         challenge_blocks = get_challenge_blocks_mongo(corrupt_content, indexes, nonce)
-        proof = get_merkle_proof(indexes, corrupte_tree)
-        recomputed_root = recompute_merkle_root(challenge_blocks, proof, (len(corrupte_tree)+1)//2)
-        
+        proof = get_merkle_proof(indexes, tree_json)
+        recomputed_root = recompute_merkle_root(challenge_blocks, proof, (len(tree_json)+1)//2)
+            
         return {"status": "success", "recomputed_root": recomputed_root}
 
     except Exception as e:

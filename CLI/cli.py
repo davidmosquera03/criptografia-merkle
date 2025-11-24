@@ -148,7 +148,7 @@ def challenge(ctx, file_id, k):
     }
 
     challenge_meta_path(challenge_id).write_text(json.dumps(challenge_meta, indent=2))
-    click.echo(f"[+] Challenge creado localmente: {challenge_id}")
+    click.echo(f"[+] Challenge creado localmente (USAR ESTE ID PARA VERIFY) : {challenge_id}")
 
     # Enviar al backend
     body = {
@@ -267,6 +267,104 @@ def files(ctx):
 
     for item in data:
         click.echo(f"- {item['id']}   |   {item['filename']}")
+
+# ============================================================
+#                      SIMULATE
+# ============================================================
+
+@cli.command()
+@click.argument("file_id")
+@click.option(
+    "--percentage", "-p",
+    required=True,
+    type=float,
+    help="Porcentaje de corrupción a aplicar en el servidor (ej: 0.2 = 20%)"
+)
+@click.option(
+    "--k",
+    default=3,
+    show_default=True,
+    help="Número de bloques a desafiar"
+)
+@click.pass_context
+def simulate(ctx, file_id, percentage, k):
+    """
+    Simula un challenge sobre una versión CORRUPTA del archivo en el servidor,
+    luego compara la raíz calculada por el servidor vs la raíz local.
+    """
+
+    api = ctx.obj["API_URL"]
+
+    # ------------------------------
+    # Cargar manifest
+    # ------------------------------
+    mpath = manifest_path(file_id)
+    if not mpath.exists():
+        click.echo(f"[X] No existe manifest para {file_id}")
+        return
+
+    manifest = json.loads(mpath.read_text())
+    num_blocks = manifest["num_blocks"]
+
+    if k > num_blocks:
+        click.echo(f"[X] k ({k}) no puede ser mayor que {num_blocks}")
+        return
+
+    # ------------------------------
+    # GENERAR INDEXES + NONCE LOCAL
+    # ------------------------------
+    indexes = sorted(random.sample(range(num_blocks), k))
+
+    raw_nonce = os.urandom(32)
+    nonce_b64 = base64.b64encode(raw_nonce).decode()
+
+    click.echo(f"[*] Nonce generado (base64): {nonce_b64}")
+
+    # ------------------------------
+    # PETICIÓN AL SERVIDOR
+    # ------------------------------
+    challenge_id = f"sim_{uuid.uuid4().hex[:10]}"
+
+    payload = {
+    "challenge_id": challenge_id,
+    "file_id": file_id,
+    "indexes": indexes,
+    "nonce": nonce_b64,
+    "percentage": percentage,
+    }
+
+    click.echo(f"[*] Enviando simulación a {api}/simulate ...")
+    resp = requests.post(f"{api}/simulate", json=payload)
+    resp.raise_for_status()
+
+    server_res = resp.json()
+    server_root = server_res["recomputed_root"]
+
+    click.echo(f"[*] Root recomputado por servidor: {server_root}")
+
+    # ------------------------------
+    # CÁLCULO LOCAL
+    # ------------------------------
+    click.echo("[*] Calculando root local...")
+
+    blocks_path = manifest["blocks_path"]
+    tree_path = manifest["tree_path"]
+
+    tree_json = json.loads(Path(tree_path).read_text())
+
+    challenge_blocks = get_challenge_blocks(blocks_path, indexes, raw_nonce)
+    proof = get_merkle_proof(indexes, tree_json)
+    local_root = recompute_merkle_root(challenge_blocks, proof, num_blocks)
+
+    click.echo(f"[*] Root local: {local_root}")
+
+    # ------------------------------
+    # COMPARAR
+    # ------------------------------
+    if server_root["data"] == local_root["data"]:
+        click.echo("[RESULTADO] Las raíces coinciden.")
+    else:
+        click.echo("[RESULTADO]  Las raíces NO coinciden.")
 
 
 if __name__ == "__main__":
