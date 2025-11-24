@@ -28,7 +28,7 @@ cd API
 uvicorn main:app --reload
 ```
 
-En otra terminar se ejecutan los comandos del CLI
+En otra terminal se ejecutan los comandos del CLI
 
 # CLI
 
