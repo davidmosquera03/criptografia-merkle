@@ -82,20 +82,17 @@ def get_merkle_tree(file_path):
 
     # if last block is not 4096, add padding
     if last_block_len<SIZE:
-        print(f"{last_block_len}b in last block not right size")
+        #print(f"{last_block_len}b in last block not right size")
         data[-1] += b'\x00' * (SIZE - last_block_len)
-        print(f"size now {len(data[-1])}b")
-    else:
-        print("Final block ok.")
+        #print(f"size now {len(data[-1])}b")
+    
 
     if not is_power_of_2(length):
-        print(f"Block no. {length} is not power of 2")
+        #print(f"Block no. {length} is not power of 2")
         closest_pow = 1 << length.bit_length()
         blocks_needed = closest_pow - length
         data += [b'\x00' * SIZE] * blocks_needed
-        print(f"length now {len(data)}")
-    else:
-        print("Block no. ok.")
+        #print(f"length now {len(data)}")
 
     # first n elements are leaves
     # for i to n make hash h(xi)
@@ -111,7 +108,7 @@ def get_merkle_tree(file_path):
         right = merkle_tree[2*i+1]["data"]
         parent = hash_data(bytes.fromhex(left) + bytes.fromhex(right)).hex()
         merkle_tree.append({"index":i+n,"data":parent})
-    print(f"Nodes=2*n-1: {len(merkle_tree)==(2*n-1)}")
+    #print(f"Nodes=2*n-1: {len(merkle_tree)==(2*n-1)}")
     print(merkle_tree[-1])
 
     # save merkle tree
@@ -196,7 +193,7 @@ def get_challenge_blocks(file_path, indexes, nonce, block_size=4096):
             block = f.read(block_size)
             #print("hash normal",hash_data(block).hex())
             h = hashlib.sha256(block + nonce).hexdigest()
-            print("block hash:", h)
+            #print("block hash:", h)
             out.append({"index": i, "data": h})
     return out
 
