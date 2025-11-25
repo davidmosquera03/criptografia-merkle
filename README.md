@@ -2,6 +2,8 @@
 
 Proyecto final de Criptografía, consiste en un servicio práctico para comprobar que un servidor realmente almacena archivos sin descargarlos completos, mediante Pruebas de Almacenamiento tipo Merkle PoR.
 
+[VIDEOS DE SETUP Y EJECUCION](https://uninorte-my.sharepoint.com/:f:/g/personal/davidmosquera_uninorte_edu_co/IgDmWLMZtRXyTp2UuW04MqzaAWDCaKkLRwvEHRcFPMzJ7-4?e=TPGbWT)
+
 # Requerimientos
 
 - Python 3.12 y superior
